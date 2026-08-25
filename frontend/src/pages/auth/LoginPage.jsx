@@ -14,7 +14,7 @@ setError('');
 try {
     const data = await login(email, password);
 
-    if (data.role === 'ADMIN') {
+    if (data.user?.role === 'admin') {
     navigate('/admin');
     } else {
     navigate('/student');
