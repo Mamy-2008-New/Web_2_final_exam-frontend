@@ -3,13 +3,14 @@ import { fetchWithAuth } from '../../api/client';
 
 export default function AdminStudents() {
 const [students, setStudents] = useState([]);
+const [name, setName] = useState('');
 const [email, setEmail] = useState('');
 const [password, setPassword] = useState('');
 const [error, setError] = useState('');
 
 const loadStudents = () => {
     fetchWithAuth('/api/students')
-    .then(setStudents)
+    .then((res) => setStudents(res.data))
     .catch((err) => setError(err.message));
 };
 
@@ -22,8 +23,9 @@ const handleCreateStudent = async (e) => {
     try {
     await fetchWithAuth('/api/students', {
         method: 'POST',
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ name, email, password }),
     });
+    setName('');
     setEmail('');
     setPassword('');
     loadStudents();
@@ -34,8 +36,8 @@ const handleCreateStudent = async (e) => {
 
 const toggleStudentStatus = async (id, currentStatus) => {
     try {
-    await fetchWithAuth(`/api/students/${id}`, {
-        method: 'PUT',
+    await fetchWithAuth(`/api/students/${id}/active`, {
+        method: 'PATCH',
         body: JSON.stringify({ active: !currentStatus }),
     });
     loadStudents();
@@ -50,6 +52,13 @@ return (
     {error && <p style={{ color: 'red' }}>{error}</p>}
 
     <form onSubmit={handleCreateStudent} style={{ marginBottom: '20px' }}>
+        <input
+        type="text"
+        placeholder="Nom étudiant"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+        />
         <input
         type="email"
         placeholder="Email étudiant"
@@ -70,7 +79,7 @@ return (
     <ul>
         {students.map((s) => (
         <li key={s.id}>
-            {s.email} - Status: {s.active ? 'Actif' : 'Suspendu'}
+            {s.name} ({s.email}) - Status: {s.active ? 'Actif' : 'Suspendu'}
             <button onClick={() => toggleStudentStatus(s.id, s.active)} style={{ marginLeft: '10px' }}>
             {s.active ? 'Suspendre' : 'Activer'}
             </button>
