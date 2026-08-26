@@ -7,3 +7,5 @@
 - STD25063: Nombana
 
 - STD25064: Harena
+
+- STD25105: Léona
