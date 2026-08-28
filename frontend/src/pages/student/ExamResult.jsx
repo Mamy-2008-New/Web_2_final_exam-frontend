@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { fetchWithAuth } from '../../api/client';
+import { client } from '../../api/client';
 
 export default function ExamResult() {
 const { id } = useParams();
@@ -10,7 +10,7 @@ const [error, setError] = useState('');
 
 useEffect(() => {
     if (!result) {
-    fetchWithAuth(`/api/my/exams/${id}`)
+    client(`/api/my/exams/${id}`)
         .then(setResult)
         .catch((err) => setError(err.message));
     }

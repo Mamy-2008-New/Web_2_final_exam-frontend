@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchWithAuth } from '../../api/client';
+import { client } from '../../api/client';
 
 export default function AdminExamResults() {
   const { id } = useParams();
@@ -8,14 +8,14 @@ export default function AdminExamResults() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchWithAuth(`/api/exams/${id}/results`)
+    client(`/api/exams/${id}/results`)
       .then(setResults)
       .catch((err) => setError(err.message));
   }, [id]);
 
   return (
     <div style={{ padding: '20px' }}>
-      <Link to="/admin/exams">← Retour aux examens</Link>
+      <Link to="/admin">← Retour aux examens</Link>
       <h2>Résultats des étudiants pour l'examen</h2>
 
       {error && <p style={{ color: 'red' }}>{error}</p>}

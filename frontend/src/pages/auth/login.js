@@ -1,4 +1,4 @@
-import { USERS_MOCK } from './db/seed.js';
+import { USERS_MOCK } from '../../db/seed.js';
 
 export const loginHandler = (req, res) => {
   const { email, password } = req.body;

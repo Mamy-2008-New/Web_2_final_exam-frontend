@@ -26,7 +26,6 @@ export default function ExamCorrection() {
           )}
         </div>
 
-        {/* Affichage des détails de correction s'ils sont fournis par le serveur */}
         {result?.correction && (
           <div className="card mb-2">
             <h3>Correction détaillée</h3>

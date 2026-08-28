@@ -1,26 +1,37 @@
-export async function fetchWithAuth(endpoint) {
-  await new Promise((resolve) => setTimeout(resolve, 300));
+const BASE_URL = 'http://localhost:3000';
 
-  if (endpoint.includes('/api/my/exams')) {
-    return [
-      { id: 1, name: 'Examen Final Web 2', course_name: 'Développement Web', start_date: '2026-01-01', end_date: '2026-12-31' },
-      { id: 2, name: 'QCM JavaScript Async', course_name: 'JS Avancé', start_date: '2026-01-01', end_date: '2026-12-31' }
-    ];
+export async function client(endpoint, { body, ...customConfig } = {}) {
+  const token = localStorage.getItem('token');
+  
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  if (endpoint.includes('/api/my/results')) {
-    return {
-      average: 14.5,
-      results: [
-        { examId: 1, examTitle: 'Examen Final Web 2', score: 15, totalPoints: 20 },
-        { examId: 2, examTitle: 'QCM JavaScript Async', score: 14, totalPoints: 20 }
-      ]
-    };
+  const config = {
+    method: body ? 'POST' : 'GET',
+    ...customConfig,
+    headers: {
+      ...headers,
+      ...customConfig.headers,
+    },
+  };
+
+  if (body) {
+    config.body = body;
   }
 
-  if (endpoint.includes('/api/admin/stats')) {
-    return { students: 3, courses: 2, exams: 2 };
+  const response = await fetch(`${BASE_URL}${endpoint}`, config);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Une erreur est survenue');
   }
 
-  return {};
+  return data;
 }
+
+export default client;

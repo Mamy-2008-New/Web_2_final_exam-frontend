@@ -1,8 +1,14 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 
-export default function ProtectedRoute({ allowedRole }) {
+export default function ProtectedRoute({ allowedRole, children }) {
   const token = localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  let user = {};
+
+  try {
+    user = JSON.parse(localStorage.getItem('user') || '{}');
+  } catch {
+    localStorage.removeItem('user');
+  }
 
   if (!token) {
     return <Navigate to="/" replace />;
@@ -12,5 +18,5 @@ export default function ProtectedRoute({ allowedRole }) {
     return <Navigate to="/" replace />;
   }
 
-  return <Outlet />;
+  return children;
 }
