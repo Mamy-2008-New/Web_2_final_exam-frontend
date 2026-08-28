@@ -1,85 +1,117 @@
 import { useState } from 'react';
-import { fetchWithAuth } from '../../api/client';
 
-export default function QuestionEditor({ examId, isLocked, onQuestionAdded }) {
-const [text, setText] = useState('');
-const [points, setPoints] = useState(1);
-const [choices, setChoices] = useState([
-{ text: '', isCorrect: true },
-{ text: '', isCorrect: false }
-]);
-const [error, setError] = useState('');
+export default function QuestionEditor({ examId }) {
+  const [questions, setQuestions] = useState([
+    {
+      id: 1,
+      statement: 'Quelle méthode HTTP est utilisée pour créer une ressource ?',
+      points: 2,
+      choices: [
+        { id: 101, statement: 'GET', is_correct: false },
+        { id: 102, statement: 'POST', is_correct: true },
+        { id: 103, statement: 'DELETE', is_correct: false }
+      ]
+    }
+  ]);
 
-if (isLocked) {
-return (
-    <div style={{ padding: '10px', background: '#ffe6e6', color: '#900' }}>
-    🔒 Les questions de cet examen ne peuvent plus être modifiées ni ajoutées car des étudiants ont déjà soumis une tentative.
+  const [statement, setStatement] = useState('');
+  const [points, setPoints] = useState(2);
+  const [choices, setChoices] = useState([
+    { statement: '', is_correct: false },
+    { statement: '', is_correct: false }
+  ]);
+
+  const handleChoiceChange = (index, text) => {
+    const updated = [...choices];
+    updated[index].statement = text;
+    setChoices(updated);
+  };
+
+  const handleCorrectChange = (index) => {
+    const updated = choices.map((c, i) => ({ ...c, is_correct: i === index }));
+    setChoices(updated);
+  };
+
+  const addChoiceField = () => {
+    setChoices([...choices, { statement: '', is_correct: false }]);
+  };
+
+  const handleAddQuestion = (e) => {
+    e.preventDefault();
+    if (!statement || choices.some((c) => !c.statement)) return;
+
+    const newQuestion = {
+      id: Date.now(),
+      statement,
+      points: Number(points),
+      choices: choices.map((c, i) => ({ id: Date.now() + i, ...c }))
+    };
+
+    setQuestions([...questions, newQuestion]);
+    setStatement('');
+    setPoints(2);
+    setChoices([
+      { statement: '', is_correct: false },
+      { statement: '', is_correct: false }
+    ]);
+  };
+
+  return (
+    <div className="card card-editor">
+      <h3>Gestion des questions pour l'examen #{examId}</h3>
+
+      <form onSubmit={handleAddQuestion} className="question-form">
+        <div className="form-group">
+          <label>Intitulé de la question :</label>
+          <input type="text" value={statement} onChange={(e) => setStatement(e.target.value)} placeholder="ex: Que signifie SQL ?" required />
+        </div>
+
+        <div className="form-group">
+          <label>Nombre de points :</label>
+          <input type="number" value={points} onChange={(e) => setPoints(e.target.value)} min="1" required />
+        </div>
+
+        <div className="form-group">
+          <label>Options de réponse (Cocher la bonne réponse) :</label>
+          {choices.map((choice, index) => (
+            <div key={index} className="choice-input-row">
+              <input 
+                type="radio" 
+                name="correctChoice" 
+                checked={choice.is_correct} 
+                onChange={() => handleCorrectChange(index)} 
+                required 
+              />
+              <input 
+                type="text" 
+                value={choice.statement} 
+                onChange={(e) => handleChoiceChange(index, e.target.value)} 
+                placeholder={`Choix ${index + 1}`} 
+                required 
+              />
+            </div>
+          ))}
+          <button type="button" className="btn btn-secondary mt-1" onClick={addChoiceField}>
+            + Ajouter un choix
+          </button>
+        </div>
+
+        <button type="submit" className="btn btn-primary">Enregistrer la question</button>
+      </form>
+
+      <h4>Questions configurées :</h4>
+      {questions.map((q, idx) => (
+        <div key={q.id} className="question-block">
+          <div className="question-title">{idx + 1}. {q.statement} ({q.points} pts)</div>
+          <ul>
+            {q.choices.map((c) => (
+              <li key={c.id} className={`choice-option ${c.is_correct ? 'is-correct' : ''}`}>
+                {c.statement} {c.is_correct && '✓ (Bonne réponse)'}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
     </div>
-);
-}
-
-const handleChoiceChange = (index, val) => {
-const updated = [...choices];
-updated[index].text = val;
-setChoices(updated);
-};
-
-const setCorrectChoice = (correctIndex) => {
-setChoices(choices.map((c, i) => ({ ...c, isCorrect: i === correctIndex })));
-};
-
-const addChoice = () => {
-if (choices.length < 6) setChoices([...choices, { text: '', isCorrect: false }]);
-};
-
-const handleSubmit = async (e) => {
-e.preventDefault();
-setError('');
-try {
-    await fetchWithAuth(`/api/exams/${examId}/questions`, {
-    method: 'POST',
-    body: JSON.stringify({ text, points, choices })
-    });
-    setText('');
-    onQuestionAdded();
-} catch (err) {
-    setError(err.message);
-}
-};
-
-return (
-<form onSubmit={handleSubmit} style={{ border: '1px solid #ccc', padding: '15px' }}>
-    <h4>Ajouter une Question</h4>
-    {error && <p style={{ color: 'red' }}>{error}</p>}
-    <div>
-    <label>Énoncé : </label>
-    <input value={text} onChange={(e) => setText(e.target.value)} required />
-    </div>
-    <div>
-    <label>Points : </label>
-    <input type="number" value={points} onChange={(e) => setPoints(Number(e.target.value))} min="1" />
-    </div>
-
-    <h5>Choix (cochez l'unique bonne réponse) :</h5>
-    {choices.map((choice, i) => (
-    <div key={i}>
-        <input
-        type="radio"
-        name="correctChoice"
-        checked={choice.isCorrect}
-        onChange={() => setCorrectChoice(i)}
-        />
-        <input
-        type="text"
-        value={choice.text}
-        onChange={(e) => handleChoiceChange(i, e.target.value)}
-        required
-        />
-    </div>
-    ))}
-    {choices.length < 6 && <button type="button" onClick={addChoice}>+ Ajouter un choix</button>}
-    <br /><br />
-    <button type="submit">Enregistrer la Question</button>
-</form>
-);
+  );
 }

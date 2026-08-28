@@ -1,34 +1,35 @@
-import { useEffect, useState } from 'react';
-import { Link, Routes, Route } from 'react-router-dom';
-import { fetchWithAuth } from '../../api/client';
-import AdminStudents from './AdminStudents';
+import { useState } from 'react';
+import Navbar from '../../components/Navbar';
 import AdminExams from './AdminExams';
+import AdminStudents from './AdminStudents';
 
 export default function AdminDashboard() {
-const [stats, setStats] = useState({ students: 0, courses: 0, exams: 0 });
+  const [activeTab, setActiveTab] = useState('exams');
 
-useEffect(() => {
-    fetchWithAuth('/api/admin/stats').then(setStats).catch(() => {});
-}, []);
+  return (
+    <div className="app-container">
+      <Navbar />
+      <main className="main-content">
+        <h2>Espace d'Administration</h2>
+        
+        <div className="tab-navigation">
+          <button 
+            className={`btn ${activeTab === 'exams' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setActiveTab('exams')}
+          >
+            Gestion des Examens
+          </button>
+          <button 
+            className={`btn ${activeTab === 'students' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setActiveTab('students')}
+          >
+            Gestion des Étudiants
+          </button>
+        </div>
 
-return (
-    <div style={{ padding: '20px' }}>
-    <h1>Espace Administrateur</h1>
-    <nav style={{ display: 'flex', gap: '15px', marginBottom: '20px' }}>
-        <Link to="/admin/students">Gestion Étudiants</Link>
-        <Link to="/admin/exams">Gestion Examens & Questions</Link>
-    </nav>
-
-    <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-        <div>Étudiants : <strong>{stats.students}</strong></div>
-        <div>Cours : <strong>{stats.courses}</strong></div>
-        <div>Examens : <strong>{stats.exams}</strong></div>
+        {activeTab === 'exams' && <AdminExams />}
+        {activeTab === 'students' && <AdminStudents />}
+      </main>
     </div>
-
-    <Routes>
-        <Route path="students" element={<AdminStudents />} />
-        <Route path="exams" element={<AdminExams />} />
-    </Routes>
-    </div>
-);
+  );
 }

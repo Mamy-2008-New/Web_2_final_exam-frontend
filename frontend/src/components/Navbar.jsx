@@ -10,11 +10,16 @@ export default function Navbar() {
   };
 
   return (
-    <nav style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 20px', background: '#e2e8f0', marginBottom: '20px' }}>
-      <div><strong>Application QCM</strong></div>
-      <button onClick={handleLogout} style={{ background: '#ef4444', color: 'white' }}>
-        Se déconnecter
-      </button>
+    <nav>
+      <div className="brand">
+        <span>🎓</span>
+        <span>Plateforme QCM</span>
+      </div>
+      <div className="nav-links">
+        <button onClick={handleLogout} className="btn btn-danger">
+          Se déconnecter
+        </button>
+      </div>
     </nav>
   );
 }

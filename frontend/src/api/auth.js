@@ -1,25 +1,54 @@
-import { API_BASE_URL } from './config';
+const MOCK_USERS = [
+  {
+    id: 1,
+    email: 'admin@examen.com',
+    password: 'admin123',
+    role: 'ADMIN',
+    active: true
+  },
+  {
+    id: 2,
+    email: 'etudiant1@examen.com',
+    password: 'student123',
+    role: 'STUDENT',
+    active: true
+  },
+  {
+    id: 3,
+    email: 'etudiant2@examen.com',
+    password: 'student123',
+    role: 'STUDENT',
+    active: true
+  },
+  {
+    id: 4,
+    email: 'etudiant.suspendu@examen.com',
+    password: 'student123',
+    role: 'STUDENT',
+    active: false 
+  }
+];
 
 export async function login(email, password) {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
-  });
+  const user = MOCK_USERS.find((u) => u.email === email);
 
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || 'Erreur de connexion');
+  if (!user) {
+    throw new Error('Identifiants invalides.');
   }
 
-  // Stocke le token et les infos utilisateur
-  if (data.token) {
-    localStorage.setItem('token', data.token);
-    localStorage.setItem('user', JSON.stringify(data.user || {}));
+  if (!user.active) {
+    throw new Error('Votre compte étudiant est suspendu.');
   }
 
-  return data;
+  if (user.password !== password) {
+    throw new Error('Identifiants invalides.');
+  }
+
+  const fakeToken = 'mock-jwt-token-12345';
+  localStorage.setItem('token', fakeToken);
+  localStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, role: user.role }));
+
+  return { token: fakeToken, user };
 }
 
 export function logout() {

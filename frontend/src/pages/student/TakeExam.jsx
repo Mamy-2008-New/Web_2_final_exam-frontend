@@ -1,71 +1,87 @@
-import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { fetchWithAuth } from '../../api/client';
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Navbar from '../../components/Navbar';
 
 export default function TakeExam() {
-const { id } = useParams();
-const navigate = useNavigate();
-const [exam, setExam] = useState(null);
-const [answers, setAnswers] = useState({});
-const [error, setError] = useState('');
+  const params = useParams();
+  const id = params.id || '1'; // Sécurité si l'URL ne contient pas l'ID[cite: 1]
+  const navigate = useNavigate();
+  const [selectedAnswers, setSelectedAnswers] = useState({});
 
-useEffect(() => {
-fetchWithAuth(`/api/my/exams/${id}`)
-    .then(setExam)
-    .catch((err) => setError(err.message));
-}, [id]);
+  const examData = {
+    title: `Examen Final Web 2 (#${id})`,
+    questions: [
+      {
+        id: 1,
+        statement: 'Quel statut HTTP indique une création réussie d\'une ressource côté serveur ?',
+        choices: [
+          { id: 101, statement: '200 OK' },
+          { id: 102, statement: '201 Created' },
+          { id: 103, statement: '400 Bad Request' },
+          { id: 104, statement: '500 Internal Error' }
+        ]
+      },
+      {
+        id: 2,
+        statement: 'Dans une architecture REST, quelle méthode est idempotente et utilisée pour remplacer une ressource ?',
+        choices: [
+          { id: 201, statement: 'POST' },
+          { id: 202, statement: 'PUT' },
+          { id: 203, statement: 'PATCH' }
+        ]
+      }
+    ]
+  };
 
-const handleOptionChange = (questionId, choiceId) => {
-setAnswers({ ...answers, [questionId]: choiceId });
-};
+  const handleSelect = (questionId, choiceId) => {
+    setSelectedAnswers({ ...selectedAnswers, [questionId]: choiceId });
+  };
 
-const handleSubmit = async (e) => {
-e.preventDefault();
-if (!window.confirm("Êtes-vous sûr de vouloir soumettre l'examen ?")) return;
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    alert(`Examen #${id} soumis avec succès !`);
+    navigate('/student');
+  };
 
-const payload = {
-    choices: Object.values(answers)
-};
+  return (
+    <div className="app-container">
+      <Navbar />
+      <main className="main-content">
+        <div className="card">
+          <h2>{examData.title}</h2>
+          <p className="text-muted">
+            Veuillez répondre à toutes les questions avant de valider votre copie.
+          </p>
+        </div>
 
-try {
-    const result = await fetchWithAuth(`/api/my/exams/${id}/submit`, {
-    method: 'POST',
-    body: JSON.stringify(payload)
-    });
-
-    navigate(`/student/result/${id}`, { state: { resultData: result } });
-} catch (err) {
-    setError(err.message);
-}
-};
-
-if (error) return <p style={{ color: 'red' }}>{error}</p>;
-if (!exam) return <p>Chargement de l'examen...</p>;
-
-return (
-<div style={{ padding: '20px' }}>
-    <h1>{exam.title}</h1>
-    <form onSubmit={handleSubmit}>
-    {exam.questions.map((q) => (
-        <fieldset key={q.id} style={{ marginBottom: '15px' }}>
-        <legend><strong>{q.text}</strong> ({q.points} pt)</legend>
-        {q.choices.map((choice) => (
-            <div key={choice.id}>
-            <label>
-                <input
-                type="radio"
-                name={`question-${q.id}`}
-                value={choice.id}
-                onChange={() => handleOptionChange(q.id, choice.id)}
-                />
-                {choice.text}
-            </label>
+        <form onSubmit={handleSubmit}>
+          {examData.questions.map((q, idx) => (
+            <div key={q.id} className="question-block">
+              <div className="question-title">Question {idx + 1} : {q.statement}</div>
+              {q.choices.map((c) => (
+                <label key={c.id} className="choice-option">
+                  <input
+                    type="radio"
+                    name={`question-${q.id}`}
+                    checked={selectedAnswers[q.id] === c.id}
+                    onChange={() => handleSelect(q.id, c.id)}
+                  />
+                  {c.statement}
+                </label>
+              ))}
             </div>
-        ))}
-        </fieldset>
-    ))}
-    <button type="submit">Soumettre mes réponses</button>
-    </form>
-</div>
-);
+          ))}
+
+          <div className="button-group">
+            <button type="button" className="btn btn-secondary" onClick={() => navigate('/student')}>
+              Annuler
+            </button>
+            <button type="submit" className="btn btn-primary">
+              Soumettre l'examen
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  );
 }
