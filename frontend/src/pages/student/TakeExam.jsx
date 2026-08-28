@@ -1,83 +1,156 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
+import { client } from '../../api/client';
 
 export default function TakeExam() {
-  const params = useParams();
-  const id = params.id || '1';
+  const { id } = useParams();
   const navigate = useNavigate();
-  const [selectedAnswers, setSelectedAnswers] = useState({});
 
-  const examData = {
-    title: `Examen Final Web 2 (#${id})`,
-    questions: [
-      {
-        id: 1,
-        statement: 'Quel statut HTTP indique une création réussie d\'une ressource côté serveur ?',
-        choices: [
-          { id: 101, statement: '200 OK' },
-          { id: 102, statement: '201 Created' },
-          { id: 103, statement: '400 Bad Request' },
-          { id: 104, statement: '500 Internal Error' }
-        ]
-      },
-      {
-        id: 2,
-        statement: 'Dans une architecture REST, quelle méthode est idempotente et utilisée pour remplacer une ressource ?',
-        choices: [
-          { id: 201, statement: 'POST' },
-          { id: 202, statement: 'PUT' },
-          { id: 203, statement: 'PATCH' }
-        ]
+  const [exam, setExam] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchExamData = async () => {
+      try {
+        setError('');
+        const data = await client(`/api/my/exams/${id}`);
+        if (isMounted) {
+          setExam(data);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setError(err.message || "Impossible de charger l'examen.");
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-    ]
+    };
+
+    fetchExamData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  const handleOptionChange = (questionId, choiceId) => {
+    setAnswers((prev) => ({
+      ...prev,
+      [questionId]: choiceId,
+    }));
   };
 
-  const handleSelect = (questionId, choiceId) => {
-    setSelectedAnswers({ ...selectedAnswers, [questionId]: choiceId });
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert(`Examen #${id} soumis avec succès !`);
-    navigate('/student');
+
+    const confirmed = window.confirm(
+      "Êtes-vous sûr de vouloir soumettre vos réponses ? Cette action est définitive (une seule tentative)."
+    );
+    if (!confirmed) return;
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      const payload = Object.entries(answers).map(([questionId, choiceId]) => ({
+        question_id: Number(questionId),
+        choice_id: Number(choiceId),
+      }));
+
+      const response = await client(`/api/my/exams/${id}/submit`, {
+        method: 'POST',
+        body: JSON.stringify({ answers: payload }),
+      });
+
+      navigate(`/student/exam/${id}/correction`, { 
+        state: { result: response } 
+      });
+    } catch (err) {
+      setError(err.message || "Erreur lors de la soumission de l'examen.");
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="app-container">
+        <Navbar />
+        <main className="main-content">
+          <p>Chargement de l'examen...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (error && !exam) {
+    return (
+      <div className="app-container">
+        <Navbar />
+        <main className="main-content">
+          <div className="card">
+            <p style={{ color: 'var(--danger)' }}>{error}</p>
+            <button className="btn btn-secondary mt-1" onClick={() => navigate('/student')}>
+              Retour à la liste
+            </button>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">
       <Navbar />
       <main className="main-content">
-        <div className="card">
-          <h2>{examData.title}</h2>
-          <p className="text-muted">
-            Veuillez répondre à toutes les questions avant de valider votre copie.
-          </p>
+        <div className="card card-hero">
+          <h2>{exam?.name || exam?.title || `Examen #${id}`}</h2>
+          <p>{exam?.description || 'Répondez aux questions ci-dessous puis validez votre copie.'}</p>
         </div>
 
         <form onSubmit={handleSubmit}>
-          {examData.questions.map((q, idx) => (
+          {exam?.questions?.map((q, index) => (
             <div key={q.id} className="question-block">
-              <div className="question-title">Question {idx + 1} : {q.statement}</div>
-              {q.choices.map((c) => (
-                <label key={c.id} className="choice-option">
-                  <input
-                    type="radio"
-                    name={`question-${q.id}`}
-                    checked={selectedAnswers[q.id] === c.id}
-                    onChange={() => handleSelect(q.id, c.id)}
-                  />
-                  {c.statement}
-                </label>
-              ))}
+              <div className="question-title">
+                Question {index + 1} : {q.statement} ({q.points || 1} pts)
+              </div>
+
+              <div>
+                {q.choices?.map((choice) => (
+                  <label key={choice.id} className="choice-option">
+                    <input
+                      type="radio"
+                      name={`question-${q.id}`}
+                      value={choice.id}
+                      checked={answers[q.id] === choice.id}
+                      onChange={() => handleOptionChange(q.id, choice.id)}
+                    />
+                    {choice.statement || choice.text}
+                  </label>
+                ))}
+              </div>
             </div>
           ))}
 
           <div className="button-group">
-            <button type="button" className="btn btn-secondary" onClick={() => navigate('/student')}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate('/student')}
+              disabled={submitting}
+            >
               Annuler
             </button>
-            <button type="submit" className="btn btn-primary">
-              Soumettre l'examen
+            <button type="submit" className="btn btn-primary" disabled={submitting}>
+              {submitting ? 'Envoi en cours...' : "Soumettre l'examen"}
             </button>
           </div>
         </form>

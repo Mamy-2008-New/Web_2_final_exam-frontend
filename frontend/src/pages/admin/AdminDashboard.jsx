@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Navbar from '../../components/Navbar';
 import AdminExams from './AdminExams';
 import AdminStudents from './AdminStudents';
+import AdminCourses from './AdminCourses';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('exams');
@@ -20,6 +21,12 @@ export default function AdminDashboard() {
             Gestion des Examens
           </button>
           <button 
+            className={`btn ${activeTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`} 
+            onClick={() => setActiveTab('courses')}
+          >
+            Gestion des Cours
+          </button>
+          <button 
             className={`btn ${activeTab === 'students' ? 'btn-primary' : 'btn-secondary'}`} 
             onClick={() => setActiveTab('students')}
           >
@@ -28,6 +35,7 @@ export default function AdminDashboard() {
         </div>
 
         {activeTab === 'exams' && <AdminExams />}
+        {activeTab === 'courses' && <AdminCourses />}
         {activeTab === 'students' && <AdminStudents />}
       </main>
     </div>

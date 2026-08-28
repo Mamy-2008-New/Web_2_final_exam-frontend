@@ -1,28 +1,34 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { fetchWithAuth } from '../../api/client';
+import Navbar from '../../components/Navbar';
 
 export default function StudentHistory() {
-const [history, setHistory] = useState({ results: [], average: 0 });
-
-useEffect(() => {
-    fetchWithAuth('/api/my/results').then(setHistory);
-}, []);
-
-return (
-    <div style={{ padding: '20px' }}>
-    <h1>Historique de mes résultats</h1>
-    <h3>Moyenne générale : {history.average.toFixed(2)} / 20</h3>
-    <ul>
-        {history.results.map((res) => (
-        <li key={res.examId} style={{ marginBottom: '8px' }}>
-            <strong>{res.examTitle}</strong> : {res.score} / {res.totalPoints}
-            <Link to={`/student/result/${res.examId}`} style={{ marginLeft: '10px' }}>
-            Voir la correction
-            </Link>
-        </li>
-        ))}
-    </ul>
+  return (
+    <div className="app-container">
+      <Navbar />
+      <main className="main-content">
+        <div className="card">
+          <h3>Historique de mes résultats et moyennes</h3>
+          <div className="stat-value stat-purple mb-1">Moyenne Générale : 15.5 / 20</div>
+          
+          <table style={{ width: '100%', marginTop: '15px' }}>
+            <thead>
+              <tr>
+                <th>Examen</th>
+                <th>Matière</th>
+                <th>Note</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Examen Final Web 2</td>
+                <td>Développement Web</td>
+                <td><strong>16 / 20</strong></td>
+                <td>12/02/2026</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </main>
     </div>
-);
+  );
 }
