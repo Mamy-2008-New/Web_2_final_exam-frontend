@@ -5,6 +5,7 @@ import TakeExam from './pages/student/TakeExam';
 import ExamResult from './pages/student/ExamResult';
 import StudentHistory from './pages/student/StudentHistory';
 import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminExamResults from './pages/admin/AdminExamResults';
 
 export default function App() {
   return (
@@ -18,8 +19,9 @@ export default function App() {
         <Route path="/student/result/:id" element={<ExamResult />} />
         <Route path="/student/history" element={<StudentHistory />} />
 
-        {/* Routes Admin */}
+        {/* Routes Administrateur */}
         <Route path="/admin/*" element={<AdminDashboard />} />
+        <Route path="/admin/exams/:id/results" element={<AdminExamResults />} />
       </Routes>
     </BrowserRouter>
   );

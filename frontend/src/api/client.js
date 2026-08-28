@@ -1,16 +1,25 @@
-export async function fetchWithAuth(url, options = {}) {
-const token = localStorage.getItem('token');
-const headers = {
+import { API_BASE_URL } from './config';
+
+export async function fetchWithAuth(endpoint, options = {}) {
+  const token = localStorage.getItem('token');
+  
+  const headers = {
     'Content-Type': 'application/json',
-    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
     ...options.headers
-};
+  };
 
-const response = await fetch(`http://localhost:3000${url}`, { ...options, headers });
-const data = await response.json();
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers
+  });
 
-if (!response.ok) {
-    throw new Error(data.message);
-}
-return data;
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    // RG-13: Gestion propre des erreurs JSON du serveur (400, 401, 403, 404, 409)
+    throw new Error(data.message || `Erreur ${response.status}`);
+  }
+
+  return data;
 }
