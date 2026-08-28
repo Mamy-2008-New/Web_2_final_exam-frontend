@@ -1,10 +1,8 @@
-// src/db/seed.js (Données de test en mémoire)
-
 export const USERS_MOCK = [
   {
     id: 1,
     email: 'admin@examen.com',
-    password: 'admin123', // En texte clair pour tester sans DB
+    password: 'admin123',
     role: 'ADMIN',
     active: true
   },
@@ -27,7 +25,7 @@ export const USERS_MOCK = [
     email: 'etudiant.suspendu@examen.com',
     password: 'student123',
     role: 'STUDENT',
-    active: false // Compte désactivé (RG-11)
+    active: false
   }
 ];
 

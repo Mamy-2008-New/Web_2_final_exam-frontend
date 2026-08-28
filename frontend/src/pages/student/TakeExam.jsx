@@ -4,7 +4,7 @@ import Navbar from '../../components/Navbar';
 
 export default function TakeExam() {
   const params = useParams();
-  const id = params.id || '1'; // Sécurité si l'URL ne contient pas l'ID[cite: 1]
+  const id = params.id || '1';
   const navigate = useNavigate();
   const [selectedAnswers, setSelectedAnswers] = useState({});
 

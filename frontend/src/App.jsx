@@ -3,7 +3,6 @@ import LoginPage from './pages/auth/LoginPage';
 import StudentExams from './pages/student/StudentExams';
 import TakeExam from './pages/student/TakeExam';
 
-// 1. IMPORTE LES COMPOSANTS ADMIN
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminExamResults from './pages/admin/AdminExamResults';
 
@@ -15,7 +14,7 @@ export default function App() {
         <Route path="/student" element={<StudentExams />} />
         <Route path="/student/exam/:id" element={<TakeExam />} />
         
-        {/* 2. AJOUTE LES ROUTES ADMIN ABSENTES */}
+        {}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/admin/exams/:id/results" element={<AdminExamResults />} />
       </Routes>

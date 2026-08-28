@@ -34,7 +34,7 @@ export default function AdminExamResults() {
           </thead>
           <tbody>
             {results.map((res) => {
-              const isPassing = res.score >= 10; // Exemple de seuil d'admission
+              const isPassing = res.score >= 10;
               return (
                 <tr key={res.id}>
                   <td>{res.email}</td>

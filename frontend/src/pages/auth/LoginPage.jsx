@@ -1,4 +1,3 @@
-// src/pages/auth/LoginPage.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login } from '../../api/auth';
@@ -15,8 +14,6 @@ export default function LoginPage() {
 
     try {
       const data = await login(email, password);
-      
-      // REDIRECTION SELON LE RÔLE EXACT
       if (data.user && data.user.role === 'ADMIN') {
         navigate('/admin');
       } else {
