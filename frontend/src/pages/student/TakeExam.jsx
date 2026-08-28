@@ -60,14 +60,17 @@ export default function TakeExam() {
       setSubmitting(true);
       setError('');
 
-      const payload = Object.entries(answers).map(([questionId, choiceId]) => ({
-        question_id: Number(questionId),
-        choice_id: Number(choiceId),
+      // RG-05: partial submission is allowed — unanswered questions are sent
+      // with choice_id: null rather than omitted, so the backend can still
+      // account for them in max_score.
+      const payload = (exam?.questions || []).map((q) => ({
+        question_id: q.id,
+        choice_id: answers[q.id] ?? null,
       }));
 
       const response = await client(`/api/my/exams/${id}/submit`, {
         method: 'POST',
-        body: JSON.stringify({ answers: payload }),
+        body: { answers: payload },
       });
 
       navigate(`/student/exam/${id}/correction`, { 

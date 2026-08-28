@@ -1,57 +1,34 @@
-const MOCK_USERS = [
-  {
-    id: 1,
-    email: 'admin@examen.com',
-    password: 'admin123',
-    role: 'ADMIN',
-    active: true
-  },
-  {
-    id: 2,
-    email: 'etudiant1@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: true
-  },
-  {
-    id: 3,
-    email: 'etudiant2@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: true
-  },
-  {
-    id: 4,
-    email: 'etudiant.suspendu@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: false 
-  }
-];
+import { client } from './client';
 
 export async function login(email, password) {
-  const user = MOCK_USERS.find((u) => u.email === email);
+  // Backend contract: POST /api/auth/login -> { token, user: { id, name, email, role } }
+  // role is lowercase: "admin" | "student" (see backend/src/models/User.ts)
+  const data = await client('/api/auth/login', {
+    body: { email, password },
+  });
 
-  if (!user) {
-    throw new Error('Identifiants invalides.');
-  }
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
 
-  if (!user.active) {
-    throw new Error('Votre compte étudiant est suspendu.');
-  }
-
-  if (user.password !== password) {
-    throw new Error('Identifiants invalides.');
-  }
-
-  const fakeToken = 'mock-jwt-token-12345';
-  localStorage.setItem('token', fakeToken);
-  localStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, role: user.role }));
-
-  return { token: fakeToken, user };
+  return data;
 }
 
 export function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+}
+
+export function getCurrentUser() {
+  try {
+    return JSON.parse(localStorage.getItem('user') || 'null');
+  } catch {
+    return null;
+  }
+}
+
+/** Rehydrates the session from the backend (e.g. on page reload) via GET /api/auth/me. */
+export async function fetchCurrentUser() {
+  const user = await client('/api/auth/me');
+  localStorage.setItem('user', JSON.stringify(user));
+  return user;
 }

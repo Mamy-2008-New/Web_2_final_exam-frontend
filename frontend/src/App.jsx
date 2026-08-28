@@ -17,7 +17,7 @@ export default function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute allowedRole="ADMIN">
+            <ProtectedRoute allowedRole="admin">
               <AdminDashboard />
             </ProtectedRoute>
           }
@@ -25,7 +25,7 @@ export default function App() {
         <Route
           path="/admin/exams/:id/results"
           element={
-            <ProtectedRoute allowedRole="ADMIN">
+            <ProtectedRoute allowedRole="admin">
               <AdminExamResults />
             </ProtectedRoute>
           }
@@ -34,7 +34,7 @@ export default function App() {
         <Route
           path="/student"
           element={
-            <ProtectedRoute allowedRole="STUDENT">
+            <ProtectedRoute allowedRole="student">
               <StudentExams />
             </ProtectedRoute>
           }
@@ -42,7 +42,7 @@ export default function App() {
         <Route
           path="/student/exam/:id"
           element={
-            <ProtectedRoute allowedRole="STUDENT">
+            <ProtectedRoute allowedRole="student">
               <TakeExam />
             </ProtectedRoute>
           }
@@ -50,7 +50,7 @@ export default function App() {
         <Route
           path="/student/exam/:id/correction"
           element={
-            <ProtectedRoute allowedRole="STUDENT">
+            <ProtectedRoute allowedRole="student">
               <ExamCorrection />
             </ProtectedRoute>
           }
@@ -58,7 +58,7 @@ export default function App() {
         <Route
           path="/student/history"
           element={
-            <ProtectedRoute allowedRole="STUDENT">
+            <ProtectedRoute allowedRole="student">
               <StudentHistory />
             </ProtectedRoute>
           }
