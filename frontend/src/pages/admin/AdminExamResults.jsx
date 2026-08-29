@@ -9,7 +9,7 @@ export default function AdminExamResults() {
 
   useEffect(() => {
     client(`/api/exams/${id}/results`)
-      .then(setResults)
+      .then((data) => setResults(Array.isArray(data?.students) ? data.students : []))
       .catch((err) => setError(err.message));
   }, [id]);
 
@@ -26,7 +26,7 @@ export default function AdminExamResults() {
         <table border="1" cellPadding="10" style={{ width: '100%', marginTop: '15px', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
-              <th>Étudiant (Email)</th>
+              <th>Étudiant</th>
               <th>Note</th>
               <th>Statut</th>
               <th>Date de soumission</th>
@@ -34,15 +34,15 @@ export default function AdminExamResults() {
           </thead>
           <tbody>
             {results.map((res) => {
-              const isPassing = res.score >= 10;
+              const isPassing = Number(res.score) >= 10;
               return (
-                <tr key={res.id}>
-                  <td>{res.email}</td>
+                <tr key={res.student_id || res.id}>
+                  <td>{res.name || res.email || `Étudiant #${res.student_id}`}</td>
                   <td>{res.score} pts</td>
                   <td style={{ color: isPassing ? 'green' : 'red', fontWeight: 'bold' }}>
                     {isPassing ? 'Admis' : 'Non admis'}
                   </td>
-                  <td>{new Date(res.submitted_at).toLocaleString()}</td>
+                  <td>{res.submitted_at ? new Date(res.submitted_at).toLocaleString() : '—'}</td>
                 </tr>
               );
             })}

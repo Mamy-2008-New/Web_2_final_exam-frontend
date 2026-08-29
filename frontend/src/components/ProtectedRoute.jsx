@@ -1,20 +1,17 @@
 import { Navigate } from 'react-router-dom';
+import { getStoredUser } from '../api/auth';
 
 export default function ProtectedRoute({ allowedRole, children }) {
   const token = localStorage.getItem('token');
-  let user = {};
-
-  try {
-    user = JSON.parse(localStorage.getItem('user') || '{}');
-  } catch {
-    localStorage.removeItem('user');
-  }
+  const user = getStoredUser();
+  const normalizedAllowedRole = String(allowedRole || '').toUpperCase();
+  const normalizedUserRole = String(user.role || '').toUpperCase();
 
   if (!token) {
     return <Navigate to="/" replace />;
   }
 
-  if (allowedRole && user.role !== allowedRole) {
+  if (normalizedAllowedRole && normalizedUserRole !== normalizedAllowedRole) {
     return <Navigate to="/" replace />;
   }
 

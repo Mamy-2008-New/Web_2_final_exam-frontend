@@ -1,29 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { client } from '../../api/client';
 
 export default function QuestionEditor({ examId }) {
-  const [questions, setQuestions] = useState([
-    {
-      id: 1,
-      statement: 'Quelle méthode HTTP est utilisée pour créer une ressource ?',
-      points: 2,
-      choices: [
-        { id: 101, statement: 'GET', is_correct: false },
-        { id: 102, statement: 'POST', is_correct: true },
-        { id: 103, statement: 'DELETE', is_correct: false }
-      ]
-    }
-  ]);
-
+  const [questions, setQuestions] = useState([]);
   const [statement, setStatement] = useState('');
   const [points, setPoints] = useState(2);
   const [choices, setChoices] = useState([
-    { statement: '', is_correct: false },
-    { statement: '', is_correct: false }
+    { text: '', is_correct: false },
+    { text: '', is_correct: false }
   ]);
+  const [error, setError] = useState('');
+
+  const loadQuestions = async () => {
+    const data = await client(`/api/exams/${examId}/questions`);
+    setQuestions(Array.isArray(data) ? data : []);
+  };
+
+  useEffect(() => {
+    if (!examId) return;
+    loadQuestions().catch((err) => setError(err.message || 'Erreur de chargement des questions.'));
+  }, [examId]);
 
   const handleChoiceChange = (index, text) => {
     const updated = [...choices];
-    updated[index].statement = text;
+    updated[index].text = text;
     setChoices(updated);
   };
 
@@ -33,32 +33,39 @@ export default function QuestionEditor({ examId }) {
   };
 
   const addChoiceField = () => {
-    setChoices([...choices, { statement: '', is_correct: false }]);
+    setChoices([...choices, { text: '', is_correct: false }]);
   };
 
-  const handleAddQuestion = (e) => {
+  const handleAddQuestion = async (e) => {
     e.preventDefault();
-    if (!statement || choices.some((c) => !c.statement)) return;
+    if (!statement || choices.some((c) => !c.text.trim())) return;
 
-    const newQuestion = {
-      id: Date.now(),
-      statement,
-      points: Number(points),
-      choices: choices.map((c, i) => ({ id: Date.now() + i, ...c }))
-    };
-
-    setQuestions([...questions, newQuestion]);
-    setStatement('');
-    setPoints(2);
-    setChoices([
-      { statement: '', is_correct: false },
-      { statement: '', is_correct: false }
-    ]);
+    try {
+      setError('');
+      await client(`/api/exams/${examId}/questions`, {
+        method: 'POST',
+        body: JSON.stringify({
+          statement,
+          points: Number(points),
+          choices: choices.map((c) => ({ text: c.text.trim(), is_correct: !!c.is_correct })),
+        }),
+      });
+      setStatement('');
+      setPoints(2);
+      setChoices([
+        { text: '', is_correct: false },
+        { text: '', is_correct: false }
+      ]);
+      await loadQuestions();
+    } catch (err) {
+      setError(err.message || 'Impossible d\'ajouter la question.');
+    }
   };
 
   return (
     <div className="card card-editor">
       <h3>Gestion des questions pour l'examen #{examId}</h3>
+      {error && <div className="alert alert-danger mb-2">{error}</div>}
 
       <form onSubmit={handleAddQuestion} className="question-form">
         <div className="form-group">
@@ -84,7 +91,7 @@ export default function QuestionEditor({ examId }) {
               />
               <input 
                 type="text" 
-                value={choice.statement} 
+                value={choice.text} 
                 onChange={(e) => handleChoiceChange(index, e.target.value)} 
                 placeholder={`Choix ${index + 1}`} 
                 required 
@@ -100,13 +107,15 @@ export default function QuestionEditor({ examId }) {
       </form>
 
       <h4>Questions configurées :</h4>
-      {questions.map((q, idx) => (
+      {questions.length === 0 ? (
+        <p>Aucune question enregistrée pour cet examen.</p>
+      ) : questions.map((q, idx) => (
         <div key={q.id} className="question-block">
           <div className="question-title">{idx + 1}. {q.statement} ({q.points} pts)</div>
           <ul>
-            {q.choices.map((c) => (
+            {q.choices?.map((c) => (
               <li key={c.id} className={`choice-option ${c.is_correct ? 'is-correct' : ''}`}>
-                {c.statement} {c.is_correct && '✓ (Bonne réponse)'}
+                {c.text || c.statement} {c.is_correct && '✓ (Bonne réponse)'}
               </li>
             ))}
           </ul>

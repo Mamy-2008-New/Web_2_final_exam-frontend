@@ -7,6 +7,7 @@ export default function ExamCorrection() {
   const location = useLocation();
 
   const result = location.state?.result;
+  const corrections = Array.isArray(result?.corrections) ? result.corrections : [];
 
   return (
     <div className="app-container">
@@ -17,25 +18,25 @@ export default function ExamCorrection() {
           {result ? (
             <div style={{ marginTop: '10px' }}>
               <p className="stat-value stat-purple mb-1">
-                Note : {result.score} / {result.total_points || 20}
+                Note : {result.score} / {result.max_score ?? 20}
               </p>
-              <p>{result.message || 'Examen soumis avec succès.'}</p>
+              <p>Examen soumis avec succès.</p>
             </div>
           ) : (
             <p>Détails de la correction disponibles ci-dessous.</p>
           )}
         </div>
 
-        {result?.correction && (
+        {corrections.length > 0 && (
           <div className="card mb-2">
             <h3>Correction détaillée</h3>
-            {result.correction.map((item, idx) => (
+            {corrections.map((item, idx) => (
               <div key={item.question_id || idx} className="question-block" style={{ marginTop: '15px' }}>
                 <div className="question-title">
                   {idx + 1}. {item.statement}
                 </div>
                 <p style={{ color: item.is_correct ? 'var(--success, green)' : 'var(--danger, red)' }}>
-                  {item.is_correct ? '✓ Correct' : '✗ Incorrect'} ({item.points_earned} pts)
+                  {item.is_correct ? '✓ Correct' : '✗ Incorrect'} ({item.points} pts)
                 </p>
               </div>
             ))}

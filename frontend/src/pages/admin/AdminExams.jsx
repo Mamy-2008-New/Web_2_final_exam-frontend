@@ -1,40 +1,68 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { client } from '../../api/client';
 import QuestionEditor from './QuestionEditor';
 
 export default function AdminExams() {
-  const [exams, setExams] = useState([
-    { id: 1, name: 'Examen Final Web 2', course_name: 'Développement Web', start_date: '2026-01-01T00:00', end_date: '2026-12-31T23:59' }
-  ]);
+  const [exams, setExams] = useState([]);
+  const [courses, setCourses] = useState([]);
   const [selectedExamId, setSelectedExamId] = useState(null);
 
   const [name, setName] = useState('');
-  const [courseName, setCourseName] = useState('');
+  const [courseId, setCourseId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [error, setError] = useState('');
 
-  const handleCreateExam = (e) => {
+  const loadCourses = async () => {
+    const data = await client('/api/courses');
+    const list = Array.isArray(data?.data) ? data.data : [];
+    setCourses(list);
+    if (!courseId && list[0]) {
+      setCourseId(String(list[0].id));
+    }
+  };
+
+  const loadExams = async () => {
+    const data = await client('/api/exams');
+    setExams(Array.isArray(data?.data) ? data.data : []);
+  };
+
+  useEffect(() => {
+    Promise.all([loadCourses(), loadExams()]).catch((err) => setError(err.message || 'Erreur de chargement des examens.'));
+  }, []);
+
+  const handleCreateExam = async (e) => {
     e.preventDefault();
-    if (!name || !courseName || !startDate || !endDate) return;
+    if (!name || !courseId || !startDate || !endDate) return;
 
-    const newExam = {
-      id: Date.now(),
-      name,
-      course_name: courseName,
-      start_date: startDate,
-      end_date: endDate
-    };
+    try {
+      setError('');
+      await client('/api/exams', {
+        method: 'POST',
+        body: JSON.stringify({
+          course_id: Number(courseId),
+          title: name,
+          description: '',
+          start_at: new Date(startDate).toISOString(),
+          end_at: new Date(endDate).toISOString(),
+        }),
+      });
 
-    setExams([...exams, newExam]);
-    setName('');
-    setCourseName('');
-    setStartDate('');
-    setEndDate('');
+      setName('');
+      setCourseId(courses[0] ? String(courses[0].id) : '');
+      setStartDate('');
+      setEndDate('');
+      await loadExams();
+    } catch (err) {
+      setError(err.message || 'Erreur lors de la création de l\'examen.');
+    }
   };
 
   return (
     <div>
       <div className="card">
         <h3>Créer un nouvel examen</h3>
+        {error && <div className="alert alert-danger mb-2">{error}</div>}
         <form onSubmit={handleCreateExam}>
           <div className="form-group">
             <label>Titre de l'examen :</label>
@@ -42,7 +70,12 @@ export default function AdminExams() {
           </div>
           <div className="form-group">
             <label>Matière / Cours :</label>
-            <input type="text" value={courseName} onChange={(e) => setCourseName(e.target.value)} placeholder="ex: Web 2" required />
+            <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required>
+              {!courses.length && <option value="">Aucun cours disponible</option>}
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>{course.code} - {course.name}</option>
+              ))}
+            </select>
           </div>
           <div className="form-group">
             <label>Date de début :</label>
@@ -52,7 +85,7 @@ export default function AdminExams() {
             <label>Date de fin :</label>
             <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
           </div>
-          <button type="submit" className="btn btn-primary">Créer l'examen</button>
+          <button type="submit" className="btn btn-primary" disabled={!courses.length}>Créer l'examen</button>
         </form>
       </div>
 
@@ -63,7 +96,7 @@ export default function AdminExams() {
             <thead>
               <tr>
                 <th>Titre</th>
-                <th>Matière</th>
+                <th>Cours</th>
                 <th>Début</th>
                 <th>Fin</th>
                 <th>Action</th>
@@ -72,10 +105,10 @@ export default function AdminExams() {
             <tbody>
               {exams.map((exam) => (
                 <tr key={exam.id}>
-                  <td><strong>{exam.name}</strong></td>
-                  <td>{exam.course_name}</td>
-                  <td>{new Date(exam.start_date).toLocaleString()}</td>
-                  <td>{new Date(exam.end_date).toLocaleString()}</td>
+                  <td><strong>{exam.title}</strong></td>
+                  <td>{exam.course_id}</td>
+                  <td>{exam.start_at ? new Date(exam.start_at).toLocaleString() : '—'}</td>
+                  <td>{exam.end_at ? new Date(exam.end_at).toLocaleString() : '—'}</td>
                   <td>
                     <button 
                       className="btn btn-secondary" 

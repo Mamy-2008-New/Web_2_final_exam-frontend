@@ -3,6 +3,7 @@ import { client } from '../../api/client';
 
 export default function AdminCourses() {
   const [courses, setCourses] = useState([]);
+  const [code, setCode] = useState('');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(true);
@@ -12,7 +13,7 @@ export default function AdminCourses() {
     try {
       setError('');
       const data = await client('/api/courses');
-      setCourses(Array.isArray(data) ? data : []);
+      setCourses(Array.isArray(data?.data) ? data.data : []);
     } catch (err) {
       setError(err.message || 'Erreur lors du chargement des cours');
     }
@@ -26,7 +27,7 @@ export default function AdminCourses() {
         setError('');
         const data = await client('/api/courses');
         if (isMounted) {
-          setCourses(Array.isArray(data) ? data : []);
+          setCourses(Array.isArray(data?.data) ? data.data : []);
         }
       } catch (err) {
         if (isMounted) {
@@ -52,8 +53,9 @@ export default function AdminCourses() {
       setError('');
       await client('/api/courses', {
         method: 'POST',
-        body: JSON.stringify({ name, description }),
+        body: JSON.stringify({ code, name, description }),
       });
+      setCode('');
       setName('');
       setDescription('');
       await reloadCourses();
@@ -81,7 +83,17 @@ export default function AdminCourses() {
 
       <form onSubmit={handleCreateCourse} className="mb-2">
         <div className="form-group mb-1">
-          <label>Nom du cours (ex. WEB2, PROG2)</label>
+          <label>Code du cours (ex. WEB2, PROG2)</label>
+          <input
+            type="text"
+            className="form-control"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+            required
+          />
+        </div>
+        <div className="form-group mb-1">
+          <label>Nom du cours</label>
           <input
             type="text"
             className="form-control"
@@ -112,6 +124,7 @@ export default function AdminCourses() {
           <thead>
             <tr>
               <th>ID</th>
+              <th>Code</th>
               <th>Nom</th>
               <th>Description</th>
               <th>Actions</th>
@@ -120,7 +133,7 @@ export default function AdminCourses() {
           <tbody>
             {courses.length === 0 ? (
               <tr>
-                <td colSpan="4" style={{ textAlign: 'center' }}>
+                <td colSpan="5" style={{ textAlign: 'center' }}>
                   Aucun cours trouvé.
                 </td>
               </tr>
@@ -128,9 +141,8 @@ export default function AdminCourses() {
               courses.map((course) => (
                 <tr key={course.id}>
                   <td>{course.id}</td>
-                  <td>
-                    <strong>{course.name}</strong>
-                  </td>
+                  <td><strong>{course.code}</strong></td>
+                  <td>{course.name}</td>
                   <td>{course.description}</td>
                   <td>
                     <button

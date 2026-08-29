@@ -1,57 +1,48 @@
-const MOCK_USERS = [
-  {
-    id: 1,
-    email: 'admin@examen.com',
-    password: 'admin123',
-    role: 'ADMIN',
-    active: true
-  },
-  {
-    id: 2,
-    email: 'etudiant1@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: true
-  },
-  {
-    id: 3,
-    email: 'etudiant2@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: true
-  },
-  {
-    id: 4,
-    email: 'etudiant.suspendu@examen.com',
-    password: 'student123',
-    role: 'STUDENT',
-    active: false 
+import { API_BASE_URL } from './config';
+
+function normalizeUser(user = {}) {
+  if (!user || typeof user !== 'object') {
+    return {};
   }
-];
+
+  return {
+    ...user,
+    role: String(user.role || '').toUpperCase(),
+  };
+}
 
 export async function login(email, password) {
-  const user = MOCK_USERS.find((u) => u.email === email);
+  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
 
-  if (!user) {
-    throw new Error('Identifiants invalides.');
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Identifiants invalides.');
   }
 
-  if (!user.active) {
-    throw new Error('Votre compte étudiant est suspendu.');
-  }
+  const user = normalizeUser(data.user);
+  const token = data.token;
 
-  if (user.password !== password) {
-    throw new Error('Identifiants invalides.');
-  }
+  localStorage.setItem('token', token);
+  localStorage.setItem('user', JSON.stringify(user));
 
-  const fakeToken = 'mock-jwt-token-12345';
-  localStorage.setItem('token', fakeToken);
-  localStorage.setItem('user', JSON.stringify({ id: user.id, email: user.email, role: user.role }));
-
-  return { token: fakeToken, user };
+  return { token, user };
 }
 
 export function logout() {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+}
+
+export function getStoredUser() {
+  try {
+    return normalizeUser(JSON.parse(localStorage.getItem('user') || '{}'));
+  } catch {
+    localStorage.removeItem('user');
+    return {};
+  }
 }

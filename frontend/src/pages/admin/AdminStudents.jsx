@@ -1,41 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { client } from '../../api/client';
 
 export default function AdminStudents() {
   const navigate = useNavigate();
-  const [students, setStudents] = useState([
-    { id: 2, email: 'etudiant1@examen.com', active: true, registeredAt: '2026-02-10' },
-    { id: 3, email: 'etudiant2@examen.com', active: true, registeredAt: '2026-02-12' },
-    { id: 4, email: 'etudiant.suspendu@examen.com', active: false, registeredAt: '2026-02-15' }
-  ]);
-
+  const [students, setStudents] = useState([]);
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const toggleStudentStatus = (id) => {
-    setStudents(students.map(s => s.id === id ? { ...s, active: !s.active } : s));
+  const loadStudents = async () => {
+    const data = await client('/api/students?page=1&limit=100');
+    setStudents(Array.isArray(data?.data) ? data.data : []);
   };
 
-  const handleAddStudent = (e) => {
+  useEffect(() => {
+    loadStudents().catch((err) => setError(err.message || 'Erreur de chargement des étudiants.'));
+  }, []);
+
+  const toggleStudentStatus = async (id, active) => {
+    try {
+      setError('');
+      await client(`/api/students/${id}/active`, {
+        method: 'PATCH',
+        body: JSON.stringify({ active: !active }),
+      });
+      await loadStudents();
+    } catch (err) {
+      setError(err.message || 'Impossible de modifier le statut.');
+    }
+  };
+
+  const handleAddStudent = async (e) => {
     e.preventDefault();
     if (!newEmail || !newPassword) return;
 
-    const newStudent = {
-      id: Date.now(),
-      email: newEmail,
-      active: true,
-      registeredAt: new Date().toISOString().split('T')[0]
-    };
-
-    setStudents([...students, newStudent]);
-    setNewEmail('');
-    setNewPassword('');
+    try {
+      setError('');
+      await client('/api/students', {
+        method: 'POST',
+        body: JSON.stringify({
+          name: newEmail.split('@')[0],
+          email: newEmail,
+          password: newPassword,
+        }),
+      });
+      setNewEmail('');
+      setNewPassword('');
+      await loadStudents();
+    } catch (err) {
+      setError(err.message || 'Impossible de créer l\'étudiant.');
+    }
   };
 
   return (
     <div>
       <div className="card">
         <h3>Ajouter un nouvel étudiant</h3>
+        {error && <div className="alert alert-danger mb-2">{error}</div>}
         <form onSubmit={handleAddStudent} className="form-grid">
           <div className="form-group">
             <label>Email de l'étudiant :</label>
@@ -72,11 +94,11 @@ export default function AdminStudents() {
                       {student.active ? 'Actif' : 'Suspendu'}
                     </span>
                   </td>
-                  <td>{student.registeredAt}</td>
+                  <td>{student.created_at ? new Date(student.created_at).toISOString().split('T')[0] : '—'}</td>
                   <td className="table-actions">
                     <button 
                       className={`btn btn-sm ${student.active ? 'btn-danger' : 'btn-primary'}`} 
-                      onClick={() => toggleStudentStatus(student.id)}
+                      onClick={() => toggleStudentStatus(student.id, student.active)}
                     >
                       {student.active ? 'Suspendre' : 'Réactiver'}
                     </button>

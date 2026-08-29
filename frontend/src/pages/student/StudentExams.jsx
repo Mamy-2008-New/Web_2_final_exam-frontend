@@ -1,15 +1,19 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { client } from '../../api/client';
 
 export default function StudentExams() {
   const navigate = useNavigate();
-  const [exams] = useState([
-    { id: 1, name: 'Examen Final Web 2', course_name: 'Développement Web', questionsCount: 5, duration: '45 min', status: 'AVAILABLE' },
-    { id: 2, name: 'QCM JavaScript Async & API', course_name: 'JS Avancé', questionsCount: 10, duration: '30 min', status: 'AVAILABLE' },
-    { id: 3, name: 'Bases de données SQL', course_name: 'Architecture DB', questionsCount: 8, duration: '60 min', status: 'COMPLETED', score: 16 }
-  ]);
+  const [exams, setExams] = useState([]);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    client('/api/my/exams')
+      .then((data) => setExams(Array.isArray(data) ? data : []))
+      .catch((err) => setError(err.message || 'Impossible de charger les examens.'));
+  }, []);
 
   return (
     <div className="app-container">
@@ -21,50 +25,49 @@ export default function StudentExams() {
           <p>Bienvenue sur votre plateforme d'évaluations en ligne. Choisissez un examen disponible pour démarrer la session.</p>
         </div>
 
+        {error && <div className="alert alert-danger mb-2">{error}</div>}
+
         <div className="stats-grid">
           <div className="card stat-card">
             <span className="stat-label">DISPONIBLES</span>
-            <div className="stat-value stat-primary">2 Examens</div>
+            <div className="stat-value stat-primary">{exams.length} Examen{exams.length > 1 ? 's' : ''}</div>
           </div>
           <div className="card stat-card">
             <span className="stat-label">COMPLÉTÉS</span>
-            <div className="stat-value stat-success">1 Examen</div>
+            <div className="stat-value stat-success">0 Examen</div>
           </div>
           <div className="card stat-card">
             <span className="stat-label">MOYENNE GÉNÉRALE</span>
-            <div className="stat-value stat-purple">16.0 / 20</div>
+            <div className="stat-value stat-purple">—</div>
           </div>
         </div>
 
         <div className="card">
           <h3>Examens attribués</h3>
           <div className="exam-list">
-            {exams.map((exam) => (
-              <div key={exam.id} className={`exam-item ${exam.status === 'COMPLETED' ? 'completed' : ''}`}>
-                <div>
-                  <div className="exam-header">
-                    <h4>{exam.name}</h4>
-                    <span className="badge badge-course">{exam.course_name}</span>
-                  </div>
-                  <p className="text-muted">
-                    {exam.questionsCount} questions • Durée estimée : {exam.duration}
-                  </p>
-                </div>
-
-                <div>
-                  {exam.status === 'COMPLETED' ? (
-                    <div className="text-right">
-                      <span className="badge badge-success mb-1">Complété</span>
-                      <strong className="score-display">Note : {exam.score}/20</strong>
+            {exams.length === 0 ? (
+              <p>Aucun examen disponible pour le moment.</p>
+            ) : (
+              exams.map((exam) => (
+                <div key={exam.id} className="exam-item">
+                  <div>
+                    <div className="exam-header">
+                      <h4>{exam.title || exam.name}</h4>
+                      <span className="badge badge-course">{exam.course_name}</span>
                     </div>
-                  ) : (
+                    <p className="text-muted">
+                      {exam.start_at ? new Date(exam.start_at).toLocaleString() : '—'} → {exam.end_at ? new Date(exam.end_at).toLocaleString() : '—'}
+                    </p>
+                  </div>
+
+                  <div>
                     <button className="btn btn-primary" onClick={() => navigate(`/student/exam/${exam.id}`)}>
                       Commencer l'épreuve →
                     </button>
-                  )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </main>

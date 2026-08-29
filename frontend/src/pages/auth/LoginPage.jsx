@@ -14,7 +14,9 @@ export default function LoginPage() {
 
     try {
       const data = await login(email, password);
-      if (data.user && data.user.role === 'ADMIN') {
+      const userRole = String(data.user?.role || '').toUpperCase();
+
+      if (userRole === 'ADMIN') {
         navigate('/admin');
       } else {
         navigate('/student');
