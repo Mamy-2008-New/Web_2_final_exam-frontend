@@ -24,6 +24,110 @@
   --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
 }
 
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at top, rgba(37, 99, 235, 0.18), transparent 35%),
+    linear-gradient(135deg, #eff6ff 0%, #f8fafc 40%, #eef2ff 100%);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  padding: 32px 28px;
+  backdrop-filter: blur(4px);
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.login-brand {
+  width: 68px;
+  height: 68px;
+  margin: 0 auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+  color: #fff;
+  font-size: 2rem;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.28);
+}
+
+.login-header h2 {
+  margin-bottom: 8px;
+  color: var(--text-main);
+  font-size: 2rem;
+}
+
+.login-header p {
+  color: var(--text-muted);
+  font-size: 0.96rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form .form-group {
+  margin: 0;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.login-form input {
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: #f8fafc;
+  padding: 14px 16px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-form input:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.8);
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+  background: #ffffff;
+}
+
+.login-button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 18px;
+  font-size: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.18);
+}
+
+.login-error {
+  margin-bottom: 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fef2f2;
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  color: #b91c1c;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
 .tab-navigation {
   display: flex;
   gap: 10px;
