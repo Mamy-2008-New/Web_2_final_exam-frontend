@@ -10,27 +10,30 @@ export default function AdminDashboard() {
   return (
     <div className="app-container">
       <Navbar />
-      <main className="main-content">
-        <div className="card card-hero mb-2">
-          <h2>Espace d'Administration</h2>
+      <main className="main-content admin-shell">
+        <div className="card card-hero admin-hero">
+          <div>
+            <span className="eyebrow">Administration</span>
+            <h2>Espace d'Administration</h2>
+          </div>
           <p>Gérez les examens, la base de cours et la liste des étudiants inscrits.</p>
         </div>
 
-        <div className="tab-navigation mb-2" style={{ display: 'flex', gap: '10px' }}>
+        <div className="tab-navigation admin-tabs">
           <button
-            className={`btn ${activeTab === 'exams' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`tab-button ${activeTab === 'exams' ? 'active' : ''}`}
             onClick={() => setActiveTab('exams')}
           >
             Examens
           </button>
           <button
-            className={`btn ${activeTab === 'courses' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`tab-button ${activeTab === 'courses' ? 'active' : ''}`}
             onClick={() => setActiveTab('courses')}
           >
             Cours
           </button>
           <button
-            className={`btn ${activeTab === 'students' ? 'btn-primary' : 'btn-secondary'}`}
+            className={`tab-button ${activeTab === 'students' ? 'active' : ''}`}
             onClick={() => setActiveTab('students')}
           >
             Étudiants

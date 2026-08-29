@@ -59,17 +59,19 @@ export default function AdminExams() {
   };
 
   return (
-    <div>
-      <div className="card">
-        <h3>Créer un nouvel examen</h3>
+    <div className="admin-layout">
+      <div className="card admin-panel">
+        <div className="panel-header">
+          <h3>Créer un nouvel examen</h3>
+        </div>
         {error && <div className="alert alert-danger mb-2">{error}</div>}
-        <form onSubmit={handleCreateExam}>
+        <form onSubmit={handleCreateExam} className="admin-form-grid">
           <div className="form-group">
-            <label>Titre de l'examen :</label>
+            <label>Titre de l'examen</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="ex: QCM React & Node.js" required />
           </div>
           <div className="form-group">
-            <label>Matière / Cours :</label>
+            <label>Matière / Cours</label>
             <select value={courseId} onChange={(e) => setCourseId(e.target.value)} required>
               {!courses.length && <option value="">Aucun cours disponible</option>}
               {courses.map((course) => (
@@ -78,19 +80,23 @@ export default function AdminExams() {
             </select>
           </div>
           <div className="form-group">
-            <label>Date de début :</label>
+            <label>Date de début</label>
             <input type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)} required />
           </div>
           <div className="form-group">
-            <label>Date de fin :</label>
+            <label>Date de fin</label>
             <input type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)} required />
           </div>
-          <button type="submit" className="btn btn-primary" disabled={!courses.length}>Créer l'examen</button>
+          <div className="form-submit-row">
+            <button type="submit" className="btn btn-primary" disabled={!courses.length}>Créer l'examen</button>
+          </div>
         </form>
       </div>
 
-      <div className="card">
-        <h3>Examens existants</h3>
+      <div className="card admin-panel">
+        <div className="panel-header">
+          <h3>Examens existants</h3>
+        </div>
         <div className="table-container">
           <table>
             <thead>

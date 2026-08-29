@@ -1,6 +1,3 @@
-/* ==========================================
-   RESET & SYSTEM VARIABLES
-   ========================================== */
 :root {
   --primary: #2563eb;
   --primary-hover: #1d4ed8;
@@ -161,6 +158,143 @@
   color: var(--danger);
   border: 1px solid rgba(239, 68, 68, 0.2);
 }
+
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(255,255,255,0.85);
+}
+
+.admin-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.admin-hero p {
+  max-width: 560px;
+  margin: 0;
+}
+
+.admin-tabs {
+  margin-bottom: 0;
+}
+
+.admin-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-panel {
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.panel-header-stack {
+  margin-bottom: 20px;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.admin-form-grid .form-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.form-submit-row {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 6px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 220px);
+}
+
+.choice-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.choice-input-row {
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  gap: 12px;
+  align-items: center;
+}
+
+.choice-input-row input[type="radio"] {
+  margin: 0;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.question-section {
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.question-section h4 {
+  margin-bottom: 14px;
+}
+
+.choice-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.empty-state {
+  color: var(--text-muted);
+  padding: 12px 0;
+}
+
+.inline-action-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-success { background-color: var(--success); color: #ffffff; }
+.btn-success:hover { background-color: #059669; }
+
+.btn-warning { background-color: var(--warning); color: #ffffff; }
+.btn-warning:hover { background-color: #d97706; }
 
 html, body, #root {
   min-height: 100vh;
