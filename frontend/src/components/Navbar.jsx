@@ -16,6 +16,12 @@ export default function Navbar() {
         <span>Plateforme QCM</span>
       </div>
       <div className="nav-links">
+        <button onClick={() => navigate('/student')} className="btn btn-secondary btn-sm">
+          Mes examens
+        </button>
+        <button onClick={() => navigate('/student/history')} className="btn btn-secondary btn-sm">
+          Historique
+        </button>
         <button onClick={handleLogout} className="btn btn-danger">
           Se déconnecter
         </button>
