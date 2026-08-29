@@ -139,7 +139,9 @@ export default function StudentExams() {
                       </div>
 
                       <div>
-                        <span className="score-display">Note : {Number(exam.score ?? 0)}</span>
+                        <span className="score-display">
+                          Note : {Number(exam.score ?? 0)} / {Number(exam.max_score ?? 0) || '—'}
+                        </span>
                       </div>
                     </div>
                   ))

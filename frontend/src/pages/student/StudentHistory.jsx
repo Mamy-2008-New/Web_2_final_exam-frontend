@@ -74,7 +74,7 @@ export default function StudentHistory() {
                 results.results.map((exam) => (
                   <tr key={exam.id}>
                     <td>{exam.exam_title}</td>
-                    <td><strong>{Number(exam.score ?? 0)}</strong></td>
+                    <td><strong>{Number(exam.score ?? 0)} / {Number(exam.max_score ?? 0) || '—'}</strong></td>
                     <td>{exam.submitted_at ? new Date(exam.submitted_at).toLocaleString() : '—'}</td>
                   </tr>
                 ))
