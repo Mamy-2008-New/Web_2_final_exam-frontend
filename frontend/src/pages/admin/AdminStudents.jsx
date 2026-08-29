@@ -7,6 +7,8 @@ export default function AdminStudents() {
   const [students, setStudents] = useState([]);
   const [newEmail, setNewEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [resetPasswordId, setResetPasswordId] = useState(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
   const [error, setError] = useState('');
 
   const loadStudents = async () => {
@@ -53,6 +55,25 @@ export default function AdminStudents() {
     }
   };
 
+  const resetStudentPassword = async (id, password) => {
+    if (!password || password.length < 6) {
+      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      return;
+    }
+
+    try {
+      setError('');
+      await client(`/api/students/${id}/password`, {
+        method: 'PATCH',
+        body: JSON.stringify({ password }),
+      });
+      setResetPasswordId(null);
+      setResetPasswordValue('');
+    } catch (err) {
+      setError(err.message || 'Impossible de réinitialiser le mot de passe.');
+    }
+  };
+
   return (
     <div>
       <div className="card">
@@ -96,18 +117,58 @@ export default function AdminStudents() {
                   </td>
                   <td>{student.created_at ? new Date(student.created_at).toISOString().split('T')[0] : '—'}</td>
                   <td className="table-actions">
-                    <button 
-                      className={`btn btn-sm ${student.active ? 'btn-danger' : 'btn-primary'}`} 
-                      onClick={() => toggleStudentStatus(student.id, student.active)}
-                    >
-                      {student.active ? 'Suspendre' : 'Réactiver'}
-                    </button>
-                    <button 
-                      className="btn btn-sm btn-secondary" 
-                      onClick={() => navigate('/admin/exams/1/results')}
-                    >
-                      Voir notes
-                    </button>
+                    {resetPasswordId === student.id ? (
+                      <div className="inline-action-form">
+                        <input
+                          type="password"
+                          value={resetPasswordValue}
+                          onChange={(e) => setResetPasswordValue(e.target.value)}
+                          placeholder="Nouveau mot de passe"
+                          className="mb-1"
+                        />
+                        <div className="btn-row">
+                          <button
+                            className="btn btn-sm btn-success"
+                            onClick={() => resetStudentPassword(student.id, resetPasswordValue)}
+                          >
+                            Valider
+                          </button>
+                          <button
+                            className="btn btn-sm btn-secondary"
+                            onClick={() => {
+                              setResetPasswordId(null);
+                              setResetPasswordValue('');
+                            }}
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <button 
+                          className={`btn btn-sm ${student.active ? 'btn-danger' : 'btn-primary'}`} 
+                          onClick={() => toggleStudentStatus(student.id, student.active)}
+                        >
+                          {student.active ? 'Suspendre' : 'Réactiver'}
+                        </button>
+                        <button
+                          className="btn btn-sm btn-warning"
+                          onClick={() => {
+                            setResetPasswordId(student.id);
+                            setResetPasswordValue('');
+                          }}
+                        >
+                          Réinitialiser mdp
+                        </button>
+                        <button 
+                          className="btn btn-sm btn-secondary" 
+                          onClick={() => navigate('/admin/exams/1/results')}
+                        >
+                          Voir notes
+                        </button>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
